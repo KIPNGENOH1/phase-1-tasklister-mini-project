@@ -1,74 +1,68 @@
 document.addEventListener("DOMContentLoaded", () => {
+ 
     const taskForm = document.getElementById("create-task-form");
-    const taskList = document.getElementById("tasks");
-    const sortButton = document.getElementById("sort-tasks");
-    let tasks = [];
+    const newTaskInput = document.getElementById("new-task-description");
+    const unorderedTaskList = document.getElementById("tasks"); 
+    const taskPriority = document.getElementById("priority");
+    const taskDueDate = document.getElementById("due-date");
     
-    taskForm.addEventListener("submit", function(event) {
-        event.preventDefault();
-        
-        const description = document.getElementById("new-task-description").value;
-        const priority = document.getElementById("priority").value;
-        const user = document.getElementById("user").value;
-        const dueDate = document.getElementById("due-date").value;
-        
-        const task = { description, priority, user, dueDate };
-        tasks.push(task);
-        renderTasks();
-        taskForm.reset();
-    });
-  
-    function renderTasks() {
-        taskList.innerHTML = "";
-        tasks.forEach((task, index) => {
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${task.description}</strong> - ${task.user} (Due: ${task.dueDate}) `;
-            
-            li.style.color = getPriorityColor(task.priority);
-            
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Delete";
-            deleteBtn.addEventListener("click", () => {
-                tasks.splice(index, 1);
-                renderTasks();
-            });
-            
-            const editBtn = document.createElement("button");
-            editBtn.textContent = "Edit";
-            editBtn.addEventListener("click", () => editTask(index));
-            
-            li.appendChild(editBtn);
-            li.appendChild(deleteBtn);
-            taskList.appendChild(li);
-        });
-    }
-  
-    function editTask(index) {
-        const task = tasks[index];
-        document.getElementById("new-task-description").value = task.description;
-        document.getElementById("priority").value = task.priority;
-        document.getElementById("user").value = task.user;
-        document.getElementById("due-date").value = task.dueDate;
-        
-        tasks.splice(index, 1);
-        renderTasks();
-    }
-  
-    function getPriorityColor(priority) {
-        switch (priority) {
-            case "high": return "red";
-            case "medium": return "orange";
-            case "low": return "green";
-            default: return "black";
+    //add an Event Listener to listen for user's actions
+    taskForm.addEventListener("submit", (event) =>{
+      event.preventDefault(); //prevents form from refreshing the page
+      console.log("Submit event fired!");//debugger
+    
+      //save user input in this variable
+      const userText = newTaskInput.value; //better to use a new variable for readability and efficience, since we only access the DOM once
+       if(userText === "") return;          //the .value retrieves what the user has entered in the input field/textbox
+      const userPriority = taskPriority.value;
+      const userDueDate = taskDueDate.value;
+    
+      //create a new list item
+      const newTaskListed = document.createElement("li");
+      newTaskListed.innerText =`${userText.trim()} - Due: ${userDueDate.trim() || "No due date"}`; //this now saves whatever the user entered into the newly created list tag
+      console.log("Task List Inner HTML:", unorderedTaskList.innerHTML);//debugger to see ul innerhtml
+      //set color based on priority
+      switch (userPriority) {
+        case "high":
+          newTaskListed.style.color = "red";
+          break;
+        case "medium":
+          newTaskListed.style.color = "orange";
+          break;
+        case "low":
+          newTaskListed.style.color = "green";
+          break;
+      }
+    
+     //append the new listed item to the unordered list
+     unorderedTaskList.appendChild(newTaskListed);//connect the <li> in memory to the <ul> in the DOM
+     console.log("UL element found:", unorderedTaskList);//debugger
+     console.log("Task added:", newTaskListed.innerText);//debugger
+    
+    //create delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.innerText = "Delete";
+    
+    //add an event listener to the delete button
+    deleteButton.addEventListener("click", () =>{
+    unorderedTaskList.removeChild(newTaskListed)}); //remove the task from the list
+    
+    //append the delete button to the new task listed
+    newTaskListed.appendChild(deleteButton);
+    
+    //create edit button
+    const editButton = document.createElement("button");
+    editButton.innerText = "Edit";
+    
+    //add an event listener to the edit button
+    editButton.addEventListener("click", () =>{
+      const newText = prompt("Edit your task:", userText);
+        if (newText !== null && newText !== "") {
+          newTaskListed.firstChild.textContent = `${newText} - Due: ${userDueDate || "No due date"}`;
         }
-    }
-  
-    sortButton.addEventListener("click", () => {
-        tasks.sort((a, b) => {
-            const priorityOrder = { "high": 1, "medium": 2, "low": 3 };
-            return priorityOrder[a.priority] - priorityOrder[b.priority];
-        });
-        renderTasks();
     });
-  });
-  
+    //append the edit button to the new task listed
+    newTaskListed.appendChild(editButton);
+      taskForm.reset();
+    });
+    })
